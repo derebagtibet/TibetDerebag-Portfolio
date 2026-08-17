@@ -2,9 +2,15 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 
+type FetcherLike = {
+  fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
+};
+
+type D1DatabaseLike = unknown;
+
 interface Env {
-  ASSETS: Fetcher;
-  DB: D1Database;
+  ASSETS: FetcherLike;
+  DB: D1DatabaseLike;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {

@@ -1,13 +1,19 @@
-import { env } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
 
 export function getDb() {
-  if (!env.DB) {
+  const runtimeEnv =
+    typeof globalThis !== "undefined"
+      ? (globalThis as { env?: { DB?: unknown } }).env
+      : undefined;
+
+  const dbBinding = runtimeEnv?.DB ?? (typeof process !== "undefined" ? process.env.DB : undefined);
+
+  if (!dbBinding) {
     throw new Error(
-      "Cloudflare D1 binding `DB` is unavailable. Set the `d1` field in .openai/hosting.json to `DB` or let your control plane inject the real binding values before using the database."
+      "No database binding was found. This app is configured for a platform-specific DB binding and is not available in the current runtime."
     );
   }
 
-  return drizzle(env.DB, { schema });
+  return drizzle(dbBinding as never, { schema });
 }
